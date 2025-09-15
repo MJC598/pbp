@@ -1,0 +1,12 @@
+---
+title: Prison Book Program Genre Request Analysis and Results
+author: Matthew Carroll
+output: word_document
+---
+
+# Prison Book Program Genre Request Analysis
+
+Following an award by the organization Better World Books, Prison Book Program (PBP) set out to determine the most frequently requested genres received from those served. The book acquisition committee charged with finding and acquiring the most impactful books able to be purchased with this award has thus strived to isolate the types of books both donated by community members and the books requested by customers. This document attempts to provide an analysis and report of the results of the latter half: the requests. 
+
+## Gathering the Data
+

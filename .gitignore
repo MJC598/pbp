@@ -1,6 +1,8 @@
 # Keeping Knit html files out
 *.nb.html
 
+outputs/
+
 
 # Keeping Data out of the Repo
 data/raw/*
@@ -60,3 +62,5 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
+/.quarto/
+**/*.quarto_ipynb

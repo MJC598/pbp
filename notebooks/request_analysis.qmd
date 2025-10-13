@@ -1,0 +1,410 @@
+---
+title: Prison Book Program Genre Request Analysis and Results
+author: Matthew Carroll
+execute:
+    echo: false
+    warning: false
+    error: false
+    include: false
+---
+
+```{r setting-cran}
+options(repos = c(CRAN = "https://cloud.r-project.org"))
+```
+
+# Prison Book Program Genre Request Analysis
+
+Following an award by the organization Better World Books, Prison Book Program (PBP) set out to determine the most frequently requested genres received from those served. The book acquisition committee charged with finding and acquiring the most impactful books able to be purchased with this award has thus strived to isolate the types of books both donated by community members and the books requested by customers. This document attempts to provide an analysis and report of the results of the latter half: the requests. 
+
+## Gathering the Data
+
+The data was acquired from letters processed between the months of May and July 2025. At the time we had a roughly 5 month backlog so letters were being sent by customers approximately between the months of November 2024 and February 2025. All of the letters were given to analysis directly after passing quality control (QC) and officially being having an associated package sent out. This means no letters rejected from individuals we cannot serve, letters that were processed by Mike (i.e. letters from New England), nor letters that only requested National Prisoner Resource Lists (NPRLs) or the Insider Guide to Jailhouse Law (IGJL, formerly We the People: Legal Primer) that were split from the request tray prior to verification were included in the analysis. Notably, these letters do specifically include Special Requests processed within the May to July timeframe as well as standard Normal and Bundle letters. The vast majority of letters analyzed are normal letters in an effort to spread out analysis across prisons and across the country and reduce overlap that is expected to occur within prisons (i.e. bundles might contain groups wanting to determine a book club and requesting the same book). It is known, however, that because of the verification process that works alphabetically state-by-state, the letters that are picked within any one session may have regional similarities. 
+
+Counting requests was a time intensive and arduous process. After recieving batches of letters from the QC tray gathered over the course of a week, each letter was again read one-by-one and the requested genre was marked.
+
+### Genres
+
+Each letter started with the same initial genre set. This genre set was provided upon the outset by the Prison Book Program and is used to both categorize and identify picking locations for books. While not perfectly up-to-date, it forms the basis for the letters to be assigned a genre and additional categories could be added if necessary. To see the genre list, please view the @tbl-genres at the end of the document.
+
+## Results
+
+Going into this project, there was a strong prior assumption that the most requested items were fantasy books, dictionaries, and NPRLs. After analyzing the data, this assumption still stands but several unexpected genres appeared to bubble closer to the top.
+
+In order to address each of the new genres, the results can be broken apart into 3 separate sections:
+
+1. Non-Fiction
+2. Fiction
+3. Scannables
+
+### Overall
+
+Upon discussion with Kelly before the project, it was assumed that non-fiction sent out roughly 2-3 times more books than fiction. This assumption largely holds up as shown in @tbl-fic-vs-nonfic. Of interesting note, a similar proportion is reflected in the number of genres we provide users (34 fiction and 58 nonfiction categories). 
+
+| Type | Requests | Per Letter |
+|------|----------|------------|
+| Fiction | 979 | 1.395 |
+| Non-Fiction | 1733 | 2.469 |
+
+: Fiction vs Non-Fiction {#tbl-fic-vs-nonfic}
+
+### Non-Fiction
+
+```{r nonfiction-boxplots-top}
+library(dplyr)
+library(here)
+
+source(here("R/base_analysis.R"))
+
+genres <- read.csv(here("data/raw/genre.csv"))
+summaries <- read.csv(here("data/processed/summary.csv"))
+
+combined <- inner_join(summaries, genres, by="Genre") %>% 
+            filter(X.Category. == "Nonfiction") %>% 
+            select(Genre, Variable, Value)
+
+top_genres <- combined %>%
+            filter(Variable == "Mean") %>%
+            arrange(desc(Value)) %>%
+            distinct(Genre, .keep_all = TRUE) %>%
+            slice_head(n = 10)
+
+df <- combined %>% 
+        filter(Genre %in% top_genres$Genre)
+            
+
+bp <- plot_boxplot(df, "Top 10 Nonfiction Genres", TRUE, here("outputs/nonfiction10_top.png"))
+```
+
+The non-fiction top 10 categories are outlined in @fig-nonfic-boxplot-top. Much of the top 10 is recognizable; we see genres such as "Art How-To", "Dictionaries", "Puzzle/Activity Books". Perhaps most notably, however, is the amount of requests for both "Mental Health" and "Business How-To". These genres are generally thought of as high-need but they appear to be some of our more requested genres out of the entire non-fiction section. Also worth noting, the mainstream religion is heavily dominated by requests for Bibles, with the most name requested bible being the King James V variant. Additional components of mainstream religion are (as expected) concordances and bible dictionaries. There is very little request for generic mainstream religious books that aren't the specific holy books.
+
+![Nonfiction Top 10](../outputs/nonfiction10_top.png){#fig-nonfic-boxplot-top}
+
+```{r nonfiction-boxplots-bottom}
+library(dplyr)
+library(here)
+
+source(here("R/base_analysis.R"))
+
+genres <- read.csv(here("data/raw/genre.csv"))
+summaries <- read.csv(here("data/processed/summary.csv"))
+
+combined <- inner_join(summaries, genres, by="Genre") %>% 
+            filter(X.Category. == "Nonfiction") %>% 
+            select(Genre, Variable, Value)
+
+bottom_genres <- combined %>%
+            filter(Variable == "Mean") %>%
+            arrange(desc(Value)) %>%
+            distinct(Genre, .keep_all = TRUE) %>%
+            slice_tail(n = 10)
+
+df <- combined %>% 
+        filter(Genre %in% bottom_genres$Genre)
+            
+
+bp <- plot_boxplot(df, "Bottom 10 Nonfiction Genres", TRUE, here("outputs/nonfiction10_bottom.png"))
+```
+
+The non-fiction bottom 10 categories are shown in @fix-nonfic-boxplot-bottom. It is important to note, given the number of requests marked, these are highly influenced by even a single new request. Thus, homesteading/off-griding (something that has appeared to show up more recently) is still listed as a bottom 10 category. Some additional interesting finds from the bottom 10 are: "Sociology", "Grief/Death", and "Speech/Public Speaking". All of these categories currently occupy full shelves and are approaching no requests in over one thousand letters.
+
+Also noting, after a discussion with Mike, there is a potential bias towards "Parenting" within the letters we receive from the New England careral system. As this analysis took no New England letters into account, this bias must be noted.
+
+![Nonfiction Bottom 10](../outputs/nonfiction10_bottom.png){#fig-nonfic-boxplot-bottom}
+
+### Fiction
+
+```{r fiction-boxplots-top}
+library(dplyr)
+library(here)
+
+source(here("R/base_analysis.R"))
+
+genres <- read.csv(here("data/raw/genre.csv"))
+summaries <- read.csv(here("data/processed/summary.csv"))
+
+combined <- inner_join(summaries, genres, by="Genre") %>% 
+            filter(X.Category. == "Fiction") %>% 
+            select(Genre, Variable, Value)
+
+top_genres <- combined %>%
+            filter(Variable == "Mean") %>%
+            arrange(desc(Value)) %>%
+            distinct(Genre, .keep_all = TRUE) %>%
+            slice_head(n = 10)
+
+df <- combined %>% 
+        filter(Genre %in% top_genres$Genre)
+            
+
+bp <- plot_boxplot(df, "Top 10 Fiction Genres", TRUE, here("outputs/fiction10_top.png"))
+```
+
+The fiction top 10 categories are displayed in @fig-fic-boxplot-top. To nobody's surprise, the most requested fiction genres are "Fantasy", "Mystery", and "Thriller". These books illustrate a very clear "top-tier" set of fiction book requests (including "Horror", "Manga", and "Sci-Fi"). However, when you look at the second tier, things get interesting. The second tier includes "Comedy", "Comics", "Urban", and "Western" books, three of which we regularly have trouble keeping on the shelf. Whether this is a growing, constant, or decreasing genre interest remains to be seen, but could definitely impact how sorters classify, especially when attempting to sort out the "Dramatic Fiction" section.
+
+![Fiction Top 10](../outputs/fiction10_top.png){#fig-fic-boxplot-top}
+
+```{r fiction-boxplots-bottom}
+library(dplyr)
+library(here)
+
+source(here("R/base_analysis.R"))
+
+genres <- read.csv(here("data/raw/genre.csv"))
+summaries <- read.csv(here("data/processed/summary.csv"))
+
+combined <- inner_join(summaries, genres, by="Genre") %>% 
+            filter(X.Category. == "Fiction") %>% 
+            select(Genre, Variable, Value)
+
+bottom_genres <- combined %>%
+            filter(Variable == "Mean") %>%
+            arrange(desc(Value)) %>%
+            distinct(Genre, .keep_all = TRUE) %>%
+            slice_tail(n = 10)
+
+df <- combined %>% 
+        filter(Genre %in% bottom_genres$Genre)
+            
+
+bp <- plot_boxplot(df, "Bottom 10 Fiction Genres", TRUE, here("outputs/fiction10_bottom.png"))
+```
+
+The bottom 10 fiction genres are not much of a surprise either. They are shown in @fig-fic-boxplot-bottom. Perhaps the most interesting trend in the bottom 10 genres is the number of culture specific categories. Notably, "Asian", "Hispanic", "Christian", and "Native American" cultures all appear in the bottom 10 but combined take up a full bookcase. Additionally, plays (which hold their own shelf) appear to rarely be requested. Also noticable, "Graphic Novels" appear in the bottom 10. This is extremely important given the interest in comics and manga in the top 10 fiction categories. This shows a very interesting divergence in requests where people request manga and comics but are, intentionally or not, avoiding graphic novels. It would be interesting to figure out if there is some good reason for this or whether our NPRL genre categories should separate them out.
+
+![Fiction Bottom 10](../outputs/fiction10_bottom.png){#fig-fic-boxplot-bottom}
+
+### Scannables
+
+For the 3rd set of resources we send out (scannables) it must be noted that we did not count letters that were pre-screened and requested only scannables that were sent out before picking. Each letter when through the verification and picking process, so most NPRL only letters are not involved in this analysis. However, as to be expected, NPRLs are still the far and away largest requested scannable we provide. As shown in @tbl-scannables there is a very clear preference for our informational resource lists rather than specific interests. This could potentially be due to our limited advertising for the scannables, or due to lack of demand. Either way, if we intend to provide scannables as a service, perhaps there is room to evaluate if it should be a supplement for books or a standard resource we want people to request by name.
+
+| Scannable | Count | Per Letter |
+|-----------|-------|------------|
+| NPRL | 93 | 0.132478632 |
+| IGJL | 57 | 0.081196581 |
+| Meditation Guide | 32 | 0.045584046 |
+| Poetry Guide | 25 | 0.035612536 |
+| LGBTQ+ Guide | 6 | 0.008547009 |
+| Drawing Guide | 3 | 0.004273504 |
+
+: Scannable Breakdown {#tbl-scannables}
+
+## Conclusion
+
+The overall result of this analysis is not particularly surprising. As expected, most genres we considered high-priority before are still high-priority, but a few surprises did crop up. From this analysis, next steps include performing a similar analysis on New England letters, monitoring the genre of the books received from donation,s and analyzing the genres of books requested as part of special requests. After a sufficient time, the same analysis on normal letters should be performed again to get an early estimate for the change of genres to see if any particular genres are perceptible to quick fluctuation that we should or should not be prepared for (i.e. burst requests). Such analysis would allow for predictive spending categories and to estimate what requests would be most likely to come in and ensure we have the most applicable books possible.
+
+## Appendix
+
+### Nonfiction Results
+
+| Genre | Total |
+|-------|-------|
+| Composition Books | 118 |
+| Dictionaries | 88 |
+| Religion (mainstream) | 86 |
+| Mental health/self help | 82 |
+| Puzzle/activity books | 81 |
+| Business how to | 71 |
+| Art how to | 68 |
+| Coloring books | 60 |
+| Language learning | 51 |
+| History (native/indigenous, ancient, war, Northern Europe) | 45 |
+| Trade skills | 44 |
+| Psychology | 39 |
+| Exercise | 37 |
+| Biography/autobiography | 36 |
+| Science | 36 |
+| Hobbies | 35 |
+| Music | 35 |
+| Animals | 34 |
+| Law | 33 |
+| Cooking & food | 32 |
+| Almanacs | 30 |
+| Games other than RPG | 29 |
+| Travel | 29 |
+| Writing | 29 |
+| Computers & technology | 25 |
+| History (Middle Eastern, Asian, Latin American, North America) | 25 |
+| Religion (non-mainstream) | 25 |
+| Thesaurus | 24 |
+| Substance Use | 22 |
+| Vehicles | 22 |
+| Art appreciation | 20 |
+| Military/veterans | 20 |
+| Personal finance | 20 |
+| Sports | 20 |
+| Economics | 18 |
+| Media (film, tv & theatre) | 18 |
+| Prison memoir/support | 18 |
+| Career/jobs | 17 |
+| Activism & social change | 16 |
+| GED | 16 |
+| New age | 16 |
+| Math | 14 |
+| Gardening & plants | 13 |
+| Health & wellness (general) | 13 |
+| National Geographic | 13 |
+| Politics | 12 |
+| RPG | 9 |
+| True adventure | 9 |
+| Fashion | 8 |
+| Health conditions | 8 |
+| Environment | 7 |
+| Philosophy | 7 |
+| Gender & women's studies | 6 |
+| Nutrition | 6 |
+| LGBTQ+ | 5 |
+| Parenting | 5 |
+| CDL | 4 |
+| Homesteading/off-grid | 4 |
+| Real estate | 4 |
+| Current Events | 3 |
+| Education/study skills | 3 |
+| Investing how to | 3 |
+| Alternative care practices | 2 |
+| Grief/death | 2 |
+| Speech/public speaking | 2 |
+| Reading | 1 |
+| Large print | 0 |
+| Sociology | 0 |
+
+: Nonfiction Requests {#tbl-nonfic-requests}
+
+### Fiction Results
+
+| Genre | Total |
+|-------|-------|
+| Fantasy | 121 |
+| Thriller/suspense/spy | 95 |
+| Mystery/detective | 82 |
+| Horror | 74 |
+| Science fiction | 74 |
+| Manga | 69 |
+| Comedy/humor |*
+| Comics | 49 |
+| Westerns | 48 |
+| Historical fiction | 34 |
+| Urban | 32 |
+| Dramatic novels | 31 |
+| Romance | 29 |
+| Poetry | 25 |
+| Adventure | 22 |
+| Essays & short stories | 22 |
+| Military Fiction | 22 |
+| Black culture | 16 |
+| Classics | 16 |
+| Myths & legends | 16 |
+| Paranormal | 16 |
+| LGBTQ+ | 14 |
+| Graphic Novels | 9 |
+| Children/adolescent | 3 |
+| Native American cultures | 3 |
+| Asian cultures | 1 |
+| Christian | 1 |
+| Coming of age | 1 |
+| Hispanic cultures | 1 |
+| Plays | 1 |
+| Chick lit/Book Club picks | 0 |
+| Large print | 0 |
+| Sports  | 0 |
+
+: Fiction Requests {#tbl-fic-requests}
+
+### Genre List
+
+| All Genres | Priority | Category |
+|------------|----------|----------|
+| Art how to | Highest | Nonfiction |
+| Comics | Highest | Fiction |
+| Dictionaries | Highest | Nonfiction |
+| Exercise | Highest | Nonfiction |
+| Health & wellness (general) | Highest | Nonfiction |
+| Language learning | Highest | Nonfiction |
+| Law | Highest | Nonfiction |
+| LGBTQ+ | Highest | Fiction |
+| LGBTQ+ | Highest | Nonfiction |
+| Manga | Highest | Fiction |
+| New age | Highest | Nonfiction |
+| Religion (non-mainstream) | Highest | Nonfiction |
+| RPG | Highest | Nonfiction |
+| Trade skills | Highest | Nonfiction |
+| Alternative care practices | High | Nonfiction |
+| Business how to | High | Nonfiction |
+| Career/jobs | High | Nonfiction |
+| Coloring books | High | Nonfiction |
+| Computers & technology | High | Nonfiction |
+| Cooking & food | High | Nonfiction |
+| Fantasy | High | Fiction |
+| Graphic Novels | High | Fiction |
+| Health conditions | High | Nonfiction |
+| History (native/indigenous, ancient, war, Northern Europe) | High | Nonfiction |
+| Hobbies | High | Nonfiction |
+| Homesteading/off-grid | High | Nonfiction |
+| Horror | High | Fiction |
+| Investing how to | High | Nonfiction |
+| Large print | High | Nonfiction |
+| Large print | High | Fiction |
+| Mental health/self help | High | Nonfiction |
+| Military/veterans | High | Nonfiction |
+| Mystery/detective | High | Fiction |
+| Nutrition | High | Nonfiction |
+| Paranormal | High | Fiction |
+| Personal finance | High | Nonfiction |
+| Prison memoir/support | High | Nonfiction |
+| Puzzle/activity books | High | Nonfiction |
+| Real estate | High | Nonfiction |
+| Religion (mainstream) | High | Nonfiction |
+| Science | High | Nonfiction |
+| Science fiction | High | Fiction |
+| Thriller/suspense/spy | High | Fiction |
+| Urban | High | Fiction |
+| Vehicles | High | Nonfiction |
+| Westerns | High | Fiction |
+| Writing | High | Nonfiction |
+| Activism & social change | Medium | Nonfiction |
+| Adventure | Medium | Fiction |
+| Animals | Medium | Nonfiction |
+| Asian cultures | Medium | Fiction |
+| Black culture | Medium | Fiction |
+| Christian | Medium | Fiction |
+| Comedy/humor | Medium | Fiction |
+| Dramatic novels | Medium | Fiction |
+| Games other than RPG | Medium | Nonfiction |
+| Gardening & plants | Medium | Nonfiction |
+| Hispanic cultures | Medium | Fiction |
+| LGBTQ+ | Medium | Fiction |
+| Math | Medium | Nonfiction |
+| Media (film, tv & theatre) | Medium | Nonfiction |
+| Military Fiction | Medium | Fiction |
+| Myths & legends | Medium | Fiction |
+| Native American cultures | Medium | Fiction |
+| Philosophy | Medium | Nonfiction |
+| Psychology | Medium | Nonfiction |
+| Reading | Medium | Nonfiction |
+| Romance | Medium | Fiction |
+| Speech/public speaking | Medium | Nonfiction |
+| Sports | Medium | Nonfiction |
+| Sports  | Medium | Fiction |
+| Travel | Medium | Nonfiction |
+| True adventure | Medium | Nonfiction |
+| Art/music history & appreciation | Low | Nonfiction |
+| Biography/autobiography | Low | Nonfiction |
+| Chick lit/Book Club picks | Low | Fiction |
+| Children/adolescent | Low | Fiction |
+| Classics | Low | Fiction |
+| Coming of age | Low | Fiction |
+| Education/study skills | Low | Nonfiction |
+| Environment | Low | Nonfiction |
+| Essays & short stories | Low | Nonfiction |
+| Gender & women's studies | Low | Nonfiction |
+| Grief/death | Low | Nonfiction |
+| Historical fiction | Low | Fiction |
+| History (Middle Eastern, Asian, Latin American, North America) | Low | Nonfiction |
+| Parenting | Low | Nonfiction |
+| Plays | Low | Fiction |
+| Poetry | Low | Fiction |
+| Politics | Low | Nonfiction |
+| Romance | Low | Fiction |
+| Sociology | Low | Nonfiction |
+
+: Genre List {#tbl-genres}
+

@@ -1,0 +1,14 @@
+project:
+  output-dir: outputs
+  execute-dir: project
+
+number-sections: true
+
+format:
+  docx: default
+  pdf:
+    documentclass: report
+    margin-left: 20mm
+    margin-top: 30mm
+    margin-right: 20mm
+    margin-bottom: 30mm
